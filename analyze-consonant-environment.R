@@ -52,6 +52,15 @@ cleandata$aft.act   <- gsub("＋", "+", cleandata$aft.act, fixed=TRUE)
 cleandata$aft.exp <- gsub("+ ", "+", cleandata$aft.exp, fixed=TRUE)
 cleandata$aft.act   <- gsub("+ ", "+", cleandata$aft.act, fixed=TRUE)
 
+## exclusions related to hand-correction notes columns
+cleandata <- cleandata[cleandata$exclude != 1,]
+## exclusions due to talker skipping / mispronouncing a word
+cleandata <- cleandata[!is.na(cleandata$syl.act),]
+## clean up unwanted columns
+unwanted.cols <- c("notes", "resolution", "exclude")
+keep.cols <- colnames(cleandata)[!colnames(cleandata) %in% unwanted.cols]
+cleandata <- cleandata[keep.cols]
+
 ## add natural class columns
 stp <- c("p", "pʰ", "t", "tʰ", "k", "kʲ", "+p", "+t", "+tʰ", "+k")
 afr <- c("tʃ", "tʃʰ", "+tʃ", "+tʃʰ")
@@ -66,24 +75,24 @@ phary <- c("ɪ", "œ", "ɐ", "ɔ", "ʊ", "æ")
 
 cleandata <- within(cleandata, {
     bef.morph <- substr(aft.exp, 1, 1) %in% "+"
-    stp.bef <- bef.exp %in% stp
-    stp.aft <- aft.exp %in% stp
-    afr.bef <- bef.exp %in% afr
-    afr.aft <- aft.exp %in% afr
-    fri.bef <- bef.exp %in% fri
-    fri.aft <- aft.exp %in% fri
-    asp.bef <- bef.exp %in% asp
-    asp.aft <- aft.exp %in% asp
-    obs.bef <- bef.exp %in% obs
-    obs.aft <- aft.exp %in% obs
-    nas.bef <- bef.exp %in% nas
-    nas.aft <- aft.exp %in% nas
-    liq.bef <- bef.exp %in% liq
-    liq.aft <- aft.exp %in% liq
-    gli.bef <- bef.exp %in% gli
-    gli.aft <- aft.exp %in% gli
-    voi.bef <- bef.exp %in% voi
-    voi.aft <- aft.exp %in% voi
+    stp.bef <- bef.act %in% stp
+    stp.aft <- aft.act %in% stp
+    afr.bef <- bef.act %in% afr
+    afr.aft <- aft.act %in% afr
+    fri.bef <- bef.act %in% fri
+    fri.aft <- aft.act %in% fri
+    asp.bef <- bef.act %in% asp
+    asp.aft <- aft.act %in% asp
+    obs.bef <- bef.act %in% obs
+    obs.aft <- aft.act %in% obs
+    nas.bef <- bef.act %in% nas
+    nas.aft <- aft.act %in% nas
+    liq.bef <- bef.act %in% liq
+    liq.aft <- aft.act %in% liq
+    gli.bef <- bef.act %in% gli
+    gli.aft <- aft.act %in% gli
+    voi.bef <- bef.act %in% voi
+    voi.aft <- aft.act %in% voi
     phary <- vowel %in% phary
 })
 manners <- c("stp", "afr", "fri", "nas", "liq", "gli")
@@ -91,12 +100,6 @@ man.bef <- paste0(manners, ".bef")
 man.aft <- paste0(manners, ".aft")
 cleandata$man.bef <- apply(cleandata[man.bef], 1, function(i) manners[i])
 cleandata$man.aft <- apply(cleandata[man.aft], 1, function(i) manners[i])
-
-## do exclusions
-cleandata <- cleandata[cleandata$exclude != 1,]
-unwanted.cols <- c("notes", "resolution", "exclude")
-keep.cols <- colnames(cleandata)[!colnames(cleandata) %in% unwanted.cols]
-cleandata <- cleandata[keep.cols]
 
 ## make some factors
 cleandata$reduction <- factor(cleandata$reduction,
@@ -108,6 +111,14 @@ vowels_by_phary <- c("i", "ǝ", "o", "u",            # non-pharyngeal
 cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # vowels_decr_f2
 cleandata$mbfact <- factor(cleandata$man.bef, levels=manners)
 cleandata$mafact <- factor(cleandata$man.aft, levels=manners)
+
+## ## ## ## ## ## ##
+##  CORPUS STATS  ##
+## ## ## ## ## ## ##
+types.morph <- length(unique(cleandata$syl.act))                            # 1393
+types.emic <- length(unique(gsub("+", "", cleandata$syl.exp, fixed=TRUE)))  #  845
+types.etic <- length(unique(gsub("+", "", cleandata$syl.act, fixed=TRUE)))  #  961
+tokens <- nrow(cleandata)                                                 #  21558
 
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
