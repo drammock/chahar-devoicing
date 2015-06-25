@@ -72,6 +72,7 @@ gli <- c("j", "+j", "w", "+w", "+wʲ")
 voi <- c(nas, liq, gli)
 asp <- c("pʰ", "tʰ", "tʃʰ", "+tʃʰ")
 phary <- c("ɪ", "œ", "ɐ", "ɔ", "ʊ", "æ")
+round <- c("œ", "ɔ", "o", "ʊ", "u")
 
 cleandata <- within(cleandata, {
     bef.morph <- substr(aft.exp, 1, 1) %in% "+"
@@ -107,7 +108,7 @@ cleandata$reduction <- factor(cleandata$reduction,
                               ordered=TRUE)
 vowels_decr_f2 <- c("i", "ɪ", "œ", "æ", "ɐ", "ǝ", "ɔ", "o", "ʊ", "u")
 vowels_by_phary <- c("i", "ǝ", "o", "u",            # non-pharyngeal
-                     "ɪ", "œ", "æ", "ɐ", "ɔ", "ʊ")  # pharyngeal
+                     "œ", "ɪ", "æ", "ɐ", "ɔ", "ʊ")  # pharyngeal
 cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # vowels_decr_f2
 cleandata$mbfact <- factor(cleandata$man.bef, levels=manners)
 cleandata$mafact <- factor(cleandata$man.aft, levels=manners)
@@ -115,6 +116,7 @@ cleandata$mafact <- factor(cleandata$man.aft, levels=manners)
 ## ## ## ## ## ## ##
 ##  CORPUS STATS  ##
 ## ## ## ## ## ## ##
+types.word <- length(unique(cleandata$word))
 types.morph <- length(unique(cleandata$syl.act))                            # 1393
 types.emic <- length(unique(gsub("+", "", cleandata$syl.exp, fixed=TRUE)))  #  845
 types.etic <- length(unique(gsub("+", "", cleandata$syl.act, fixed=TRUE)))  #  961
@@ -130,20 +132,25 @@ bordercol <- "#FFFFFF33"  # NA  # hcl(0, 0, 80)
 offset <- 0
 # nothing
 mosaicplot(with(cleandata, table(reduction)), off=offset,
-           dir="h", color=threeshade, las=1, border=bordercol)
+           dir="h", color=threeshade, las=1, border=bordercol,
+           main="reduction type")
 plot.new()
 ## vowel
 mosaicplot(with(cleandata, table(vfact, reduction)), off=offset,
-           dir=c("v", "h"), color=threeshade, las=1, border=bordercol)
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × vowel quality", xlab="vowel quality")
 ## pharyngeal
 mosaicplot(with(cleandata, table(phary, reduction)), off=offset,
-           dir=c("v", "h"), color=threeshade, las=1, border=bordercol)
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × harmony class", xlab="pharyngeal")
 ## manner: before
 mosaicplot(with(cleandata, table(mbfact, reduction)), off=offset,
-           dir=c("v", "h"), color=threeshade, las=1, border=bordercol)
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × preceding consonant", xlab="manner")
 ## manner: after
 mosaicplot(with(cleandata, table(mafact, reduction)), off=offset,
-           dir=c("v", "h"), color=threeshade, las=1, border=bordercol)
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × following consonant", xlab="manner")
 dev.off()
 
 ## ## ## ## ## ## ## ## ##
