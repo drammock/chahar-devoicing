@@ -24,6 +24,7 @@ Results show aspiration of the following consonant to be the best predictor of v
 <!-- State the contribution to linguistic research made by the analysis. -->
 Results are discussed in light of potentially conflicting forces: articulatory ease [e.g., @Lindblom] and phonetic cue preservation [@Wright]. In particular, persistence of vowels flanked by sonorant consonants is explained by appeal to articulatory ease, whereas reduction of vowels flanked by fricative consonants is explained by appeal to the robustness of fricative-internal cues. The high degree of reduction around stop consonants is rather more difficult to account for, due to the relative fragility of stop-consonant cues (which would predict preservation of the vowel in order to perserve formant transition cues).
 
+Change in progress?  New historical development (moving toward initial C clusters?)
 
 <!-- While citation in the text of the relevant literature is essential, a separate list of references at the end of the abstract is generally unnecessary. -->
 
@@ -50,8 +51,7 @@ Laboratory phonology?
 
 # Analysis
 - vowel in first syllable of each target word categorized as “deleted”, “devoiced”, or “not reduced”
-- ??? how classified?  looked at spectrogram and...
-- ? vowel duration measured?
+- how classified?  looked at spectrogram and listened, no audible/visible vowel duration = deleted; visible vowel duration but no formants = devoiced
 
 ## factors examined
 - vowel identity / quality
