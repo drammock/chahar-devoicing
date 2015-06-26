@@ -75,32 +75,52 @@ phary <- c("ɪ", "œ", "ɐ", "ɔ", "ʊ", "æ")
 round <- c("œ", "ɔ", "o", "ʊ", "u")
 
 cleandata <- within(cleandata, {
-    bef.morph <- substr(aft.exp, 1, 1) %in% "+"
+    coda <- !substr(aft.exp, 1, 1) %in% "+"
     stp.bef <- bef.act %in% stp
-    stp.aft <- aft.act %in% stp
     afr.bef <- bef.act %in% afr
-    afr.aft <- aft.act %in% afr
     fri.bef <- bef.act %in% fri
-    fri.aft <- aft.act %in% fri
     asp.bef <- bef.act %in% asp
-    asp.aft <- aft.act %in% asp
     obs.bef <- bef.act %in% obs
-    obs.aft <- aft.act %in% obs
     nas.bef <- bef.act %in% nas
-    nas.aft <- aft.act %in% nas
     liq.bef <- bef.act %in% liq
-    liq.aft <- aft.act %in% liq
     gli.bef <- bef.act %in% gli
-    gli.aft <- aft.act %in% gli
     voi.bef <- bef.act %in% voi
+    stp.coda <- aft.act %in% stp & coda
+    afr.coda <- aft.act %in% afr & coda
+    fri.coda <- aft.act %in% fri & coda
+    asp.coda <- aft.act %in% asp & coda
+    obs.coda <- aft.act %in% obs & coda
+    nas.coda <- aft.act %in% nas & coda
+    liq.coda <- aft.act %in% liq & coda
+    gli.coda <- aft.act %in% gli & coda
+    voi.coda <- aft.act %in% voi & coda
+    stp.aft <- aft.act %in% stp
+    afr.aft <- aft.act %in% afr
+    fri.aft <- aft.act %in% fri
+    asp.aft <- aft.act %in% asp
+    obs.aft <- aft.act %in% obs
+    nas.aft <- aft.act %in% nas
+    liq.aft <- aft.act %in% liq
+    gli.aft <- aft.act %in% gli
     voi.aft <- aft.act %in% voi
+    stp.ambi <- aft.act %in% stp & !coda
+    afr.ambi <- aft.act %in% afr & !coda
+    fri.ambi <- aft.act %in% fri & !coda
+    asp.ambi <- aft.act %in% asp & !coda
+    obs.ambi <- aft.act %in% obs & !coda
+    nas.ambi <- aft.act %in% nas & !coda
+    liq.ambi <- aft.act %in% liq & !coda
+    gli.ambi <- aft.act %in% gli & !coda
+    voi.ambi <- aft.act %in% voi & !coda
     phary <- vowel %in% phary
 })
 manners <- c("stp", "afr", "fri", "nas", "liq", "gli")
 man.bef <- paste0(manners, ".bef")
 man.aft <- paste0(manners, ".aft")
+man.coda <- paste0(manners, ".coda")
 cleandata$man.bef <- apply(cleandata[man.bef], 1, function(i) manners[i])
 cleandata$man.aft <- apply(cleandata[man.aft], 1, function(i) manners[i])
+cleandata$man.coda <- apply(cleandata[man.coda], 1, function(i) manners[i])
 
 ## make some factors
 cleandata$reduction <- factor(cleandata$reduction,
@@ -117,7 +137,7 @@ cleandata$mafact <- factor(cleandata$man.aft, levels=manners)
 ##  CORPUS STATS  ##
 ## ## ## ## ## ## ##
 types.word <- length(unique(cleandata$word))
-types.morph <- length(unique(cleandata$syl.act))                            # 1393
+types.syll <- length(unique(cleandata$syl.act))                             # 1393
 types.emic <- length(unique(gsub("+", "", cleandata$syl.exp, fixed=TRUE)))  #  845
 types.etic <- length(unique(gsub("+", "", cleandata$syl.act, fixed=TRUE)))  #  961
 tokens <- nrow(cleandata)                                                 #  21558
@@ -125,8 +145,8 @@ tokens <- nrow(cleandata)                                                 #  215
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
 ## ## ## ## ## ## ##
-cairo_pdf("mosaics_consonants.pdf", height=11.69, width=8.27, family="Charis SIL")
-par(mfrow=c(3, 2))
+cairo_pdf("mosaics_consonants.pdf", height=8.27, width=11.69, family="Charis SIL")
+par(mfrow=c(2, 3))
 threeshade <- hcl(0, 0, c(70, 50, 30))
 bordercol <- "#FFFFFF33"  # NA  # hcl(0, 0, 80)
 offset <- 0
@@ -134,15 +154,14 @@ offset <- 0
 mosaicplot(with(cleandata, table(reduction)), off=offset,
            dir="h", color=threeshade, las=1, border=bordercol,
            main="reduction type")
-plot.new()
-## vowel
-mosaicplot(with(cleandata, table(vfact, reduction)), off=offset,
-           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
-           main="reduction × vowel quality", xlab="vowel quality")
 ## pharyngeal
 mosaicplot(with(cleandata, table(phary, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
            main="reduction × harmony class", xlab="pharyngeal")
+## vowel
+mosaicplot(with(cleandata, table(vfact, reduction)), off=offset,
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × vowel quality", xlab="vowel quality")
 ## manner: before
 mosaicplot(with(cleandata, table(mbfact, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
@@ -160,8 +179,10 @@ stop()
 library(ordinal)
 ## model 1: {stop, affricate, fricative, aspiration} x before/after,
 ## repetition, morpheme boundary
-stp_afr_fri_asp <- clmm(reduction ~ stp.bef + stp.aft + afr.bef + afr.aft +
-                            fri.bef + fri.aft + asp.bef + asp.aft + bef.morph +
+stp_afr_fri_asp <- clmm(reduction ~ stp.bef + stp.coda + stp.ambi +
+                            afr.bef + afr.coda + afr.ambi +
+                            fri.bef + fri.coda + fri.ambi +
+                            asp.bef + asp.coda + asp.ambi +
                             as.factor(rep) + (1|speaker) + (1|vowel) + (1|word),
                         data=cleandata)
 sink("model1-summary.txt")
