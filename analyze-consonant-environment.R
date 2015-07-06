@@ -8,20 +8,6 @@
 cleandata <- read.delim("clean_cons_env_zh_corrected.tsv",
                         stringsAsFactors=FALSE, na.strings=c("NA", "无"))
 
-## fix bad column names (contained parentheses and question marks)
-colnames(cleandata) <- c("人", "重", "元音", "无声化", "无声化.二进制",
-                         "音节.说的", "音节.预期", "词", "前辅音.预期",
-                         "後辅音.预期", "前辅音.说的", "後辅音.说的", "笔记",
-                         "怎么办", "排除")
-
-## corrections not made in the cleaned data file
-cleandata$元音[cleandata$元音 %in% c("a", "ɑ")] <- "ɐ"
-cleandata$元音[cleandata$元音 %in% "ɿ"] <- "ɪ"
-dzh.cols <- c("词", "音节.预期", "音节.说的", "前辅音.预期", "前辅音.说的",
-              "後辅音.预期", "後辅音.说的")
-cleandata[dzh.cols] <- lapply(cleandata[dzh.cols],
-                              function(i) gsub("dʒ", "tʃ", i, fixed=TRUE))
-
 ## mappings to go back and forth between English and Chinese column headings
 en.zh.transl <- c(speaker="人", rep="重", vowel="元音", reduction="无声化",
                   red.bin="无声化.二进制", syl.act="音节.说的",
@@ -45,15 +31,8 @@ en.zh.recode <- "'devoiced'='半'; 'deleted'='全'; 'none'=''"
 cleandata$reduction <- with(cleandata, car::recode(reduction, zh.en.recode,
                                                    as.factor.result=FALSE))
 
-## convert Chinese plus sign \uFF0B to ASCII \u002B (input is mixture of both)
-cleandata$aft.exp <- gsub("＋", "+", cleandata$aft.exp, fixed=TRUE)
-cleandata$aft.act   <- gsub("＋", "+", cleandata$aft.act, fixed=TRUE)
-## also get rid of extra spaces between plus and following consonant
-cleandata$aft.exp <- gsub("+ ", "+", cleandata$aft.exp, fixed=TRUE)
-cleandata$aft.act   <- gsub("+ ", "+", cleandata$aft.act, fixed=TRUE)
-
 ## exclusions related to hand-correction notes columns
-cleandata <- cleandata[cleandata$exclude != 1,]
+cleandata <- cleandata[is.na(cleandata$exclude),]
 ## exclusions due to talker skipping / mispronouncing a word
 cleandata <- cleandata[!is.na(cleandata$syl.act),]
 ## clean up unwanted columns
@@ -61,21 +40,31 @@ unwanted.cols <- c("notes", "resolution", "exclude")
 keep.cols <- colnames(cleandata)[!colnames(cleandata) %in% unwanted.cols]
 cleandata <- cleandata[keep.cols]
 
-## add natural class columns
-stp <- c("p", "pʰ", "t", "tʰ", "k", "kʲ", "+p", "+t", "+tʰ", "+k")
-afr <- c("tʃ", "tʃʰ", "+tʃ", "+tʃʰ")
+##
+
+## natural classes
+asp.stp <- c("pʰ", "tʰ", "+tʰ")
+pln.stp <- c("p", "t", "k", "kʲ", "+p", "+t", "+k")
+stp <- c(asp.stp, pln.stp)
+asp.afr <- c("tʃʰ", "+tʃʰ")
+pln.afr <- c("tʃ", "+tʃ")
+afr <- c(asp.afr, pln.afr)
 fri <- c("x", "s", "ʃ", "xʲ", "+x", "+xʲ", "+s", "+ʃ")
 obs <- c(stp, afr, fri)
 nas <- c("m", "+m", "+mʲ", "n", "+n", "+nʲ", "ŋ")
 liq <- c("l", "+l", "+lʲ", "r", "+r", "+rʲ", "rʲ")
 gli <- c("j", "+j", "w", "+w", "+wʲ")
 voi <- c(nas, liq, gli)
-asp <- c("pʰ", "tʰ", "tʃʰ", "+tʃʰ")
+asp <- c(asp.stp, asp.afr)
 phary <- c("ɪ", "œ", "ɐ", "ɔ", "ʊ", "æ")
 round <- c("œ", "ɔ", "o", "ʊ", "u")
 
 cleandata <- within(cleandata, {
     coda <- !substr(aft.exp, 1, 1) %in% "+"
+    astp.bef <- bef.act %in% asp.stp
+    pstp.bef <- bef.act %in% pln.stp
+    aafr.bef <- bef.act %in% asp.afr
+    pafr.bef <- bef.act %in% pln.afr
     stp.bef <- bef.act %in% stp
     afr.bef <- bef.act %in% afr
     fri.bef <- bef.act %in% fri
@@ -85,15 +74,10 @@ cleandata <- within(cleandata, {
     liq.bef <- bef.act %in% liq
     gli.bef <- bef.act %in% gli
     voi.bef <- bef.act %in% voi
-    stp.coda <- aft.act %in% stp & coda
-    afr.coda <- aft.act %in% afr & coda
-    fri.coda <- aft.act %in% fri & coda
-    asp.coda <- aft.act %in% asp & coda
-    obs.coda <- aft.act %in% obs & coda
-    nas.coda <- aft.act %in% nas & coda
-    liq.coda <- aft.act %in% liq & coda
-    gli.coda <- aft.act %in% gli & coda
-    voi.coda <- aft.act %in% voi & coda
+    astp.aft <- aft.act %in% asp.stp
+    pstp.aft <- aft.act %in% pln.stp
+    aafr.aft <- aft.act %in% asp.afr
+    pafr.aft <- aft.act %in% pln.afr
     stp.aft <- aft.act %in% stp
     afr.aft <- aft.act %in% afr
     fri.aft <- aft.act %in% fri
@@ -103,45 +87,71 @@ cleandata <- within(cleandata, {
     liq.aft <- aft.act %in% liq
     gli.aft <- aft.act %in% gli
     voi.aft <- aft.act %in% voi
-    stp.ambi <- aft.act %in% stp & !coda
-    afr.ambi <- aft.act %in% afr & !coda
-    fri.ambi <- aft.act %in% fri & !coda
-    asp.ambi <- aft.act %in% asp & !coda
-    obs.ambi <- aft.act %in% obs & !coda
-    nas.ambi <- aft.act %in% nas & !coda
-    liq.ambi <- aft.act %in% liq & !coda
-    gli.ambi <- aft.act %in% gli & !coda
-    voi.ambi <- aft.act %in% voi & !coda
+    astp.coda <- astp.aft & coda
+    pstp.coda <- pstp.aft & coda
+    aafr.coda <- aafr.aft & coda
+    pafr.coda <- pafr.aft & coda
+    stp.coda <- stp.aft & coda
+    afr.coda <- afr.aft & coda
+    fri.coda <- fri.aft & coda
+    asp.coda <- asp.aft & coda
+    obs.coda <- obs.aft & coda
+    nas.coda <- nas.aft & coda
+    liq.coda <- liq.aft & coda
+    gli.coda <- gli.aft & coda
+    voi.coda <- voi.aft & coda
+    astp.ambi <- astp.aft & !coda
+    pstp.ambi <- pstp.aft & !coda
+    aafr.ambi <- aafr.aft & !coda
+    pafr.ambi <- pafr.aft & !coda
+    stp.ambi <- stp.aft & !coda
+    afr.ambi <- afr.aft & !coda
+    fri.ambi <- fri.aft & !coda
+    asp.ambi <- asp.aft & !coda
+    obs.ambi <- obs.aft & !coda
+    nas.ambi <- nas.aft & !coda
+    liq.ambi <- liq.aft & !coda
+    gli.ambi <- gli.aft & !coda
+    voi.ambi <- voi.aft & !coda
     phary <- vowel %in% phary
+    round <- vowel %in% round
 })
-manners <- c("stp", "afr", "fri", "nas", "liq", "gli")
+
+manners <- c("gli", "liq", "nas", "fri", "pafr", "aafr", "pstp", "astp")  # glide first = baseline
 man.bef <- paste0(manners, ".bef")
 man.aft <- paste0(manners, ".aft")
+man.ambi <- paste0(manners, ".ambi")
 man.coda <- paste0(manners, ".coda")
 cleandata$man.bef <- apply(cleandata[man.bef], 1, function(i) manners[i])
 cleandata$man.aft <- apply(cleandata[man.aft], 1, function(i) manners[i])
-cleandata$man.coda <- apply(cleandata[man.coda], 1, function(i) manners[i])
+cleandata$man.ambi <- apply(cleandata[man.ambi], 1,
+                            function(i) if (all(!i)) NA else manners[i])
+cleandata$man.coda <- apply(cleandata[man.coda], 1,
+                            function(i) if (all(!i)) NA else manners[i])
 
 ## make some factors
 cleandata$reduction <- factor(cleandata$reduction,
                               levels=c("none", "devoiced", "deleted"),
                               ordered=TRUE)
 vowels_decr_f2 <- c("i", "ɪ", "œ", "æ", "ɐ", "ǝ", "ɔ", "o", "ʊ", "u")
-vowels_by_phary <- c("i", "ǝ", "o", "u",            # non-pharyngeal
-                     "œ", "ɪ", "æ", "ɐ", "ɔ", "ʊ")  # pharyngeal
-cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # vowels_decr_f2
-cleandata$mbfact <- factor(cleandata$man.bef, levels=manners)
-cleandata$mafact <- factor(cleandata$man.aft, levels=manners)
+vowels_by_phary <- c("œ", "ɪ", "æ", "ɐ", "ɔ", "ʊ",  # pharyngeal
+                     "i", "ǝ", "o", "u")            # non-pharyngeal
+
+cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # œ baseline
+cleandata$man.bef <- factor(cleandata$man.bef, levels=manners)    # gli baseline
+cleandata$man.aft <- factor(cleandata$man.aft, levels=manners)    # gli baseline
+cleandata$man.ambi <- factor(cleandata$man.ambi, levels=manners)  # gli baseline
+cleandata$man.coda <- factor(cleandata$man.coda, levels=manners)  # gli baseline
 
 ## ## ## ## ## ## ##
 ##  CORPUS STATS  ##
 ## ## ## ## ## ## ##
-types.word <- length(unique(cleandata$word))
-types.syll <- length(unique(cleandata$syl.act))                             # 1393
-types.emic <- length(unique(gsub("+", "", cleandata$syl.exp, fixed=TRUE)))  #  845
-types.etic <- length(unique(gsub("+", "", cleandata$syl.act, fixed=TRUE)))  #  961
-tokens <- nrow(cleandata)                                                 #  21558
-
+types.word <- length(unique(cleandata$word))                                # 1204
+types.syll <- length(unique(cleandata$syl.act))                             # 1389
+types.emic <- length(unique(gsub("+", "", cleandata$syl.exp, fixed=TRUE)))  #  803
+types.etic <- length(unique(gsub("+", "", cleandata$syl.act, fixed=TRUE)))  #  912
+tokens <- nrow(cleandata)                                                 #  21556
+#
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
 ## ## ## ## ## ## ##
@@ -163,32 +173,79 @@ mosaicplot(with(cleandata, table(vfact, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
            main="reduction × vowel quality", xlab="vowel quality")
 ## manner: before
-mosaicplot(with(cleandata, table(mbfact, reduction)), off=offset,
+mosaicplot(with(cleandata, table(man.bef, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
            main="reduction × preceding consonant", xlab="manner")
-## manner: after
-mosaicplot(with(cleandata, table(mafact, reduction)), off=offset,
+## manner: intervocalic
+mosaicplot(with(cleandata, table(man.ambi, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
-           main="reduction × following consonant", xlab="manner")
+           main="reduction × intervocalic consonant", xlab="manner")
+## manner: coda
+mosaicplot(with(cleandata, table(man.coda, reduction)), off=offset,
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × coda consonant", xlab="manner")
 dev.off()
+
+## ## ## ## ## ##
+## SIMULATIONS ##
+## ## ## ## ## ##
+stop()
+library(ordinal)
+outfile <- "simulation-results.txt"
+sink(outfile)
+cat("## SIMULATION RESULTS\n\n")
+sink()
+n <- nrow(cleandata)
+prop <- c(0.16, 0.08, 0.04, 0.02, 0.01)
+for (p in prop) {
+    reduced <- rbinom(n, 1, p)
+    deleted <- rbinom(sum(reduced), 1, 0.5) + 1
+    reduced[reduced == 1] <- deleted
+    reduc <- factor(reduced, labels=c("none", "devoiced", "deleted"))
+    mod <- with(cleandata, clmm(reduc ~ man.bef + man.aft * coda +
+                                    as.factor(rep) + (1|speaker) + (1|word) +
+                                    (1|vowel)))
+    save(mod, file=paste0("mod_", p, ".Rdata", collapse=""))
+    sink(outfile, append=TRUE)
+    cat("## proportion of events: ", p, "\n\n")
+    print(summary(mod))
+    cat("\n\n")
+    sink()
+}
+stop()
+
+## ## ## ## ## ## ## ## ## ## ##
+## EXACT LOGISTIC REGRESSION  ##
+## ## ## ## ## ## ## ## ## ## ##
+# stop()
+# library(elrm)
+# xdata <- xtabs(~ red.bin + interaction(man.bef, man.aft, coda, vfact,
+#                                        as.factor(rep), speaker), data=cleandata)
+# elrm(formula=red.bin ~ man.bef + man.ambi + man.coda + vfact + as.factor(rep) +
+#          speaker + word,
+#      interest= ~ man.bef + man.ambi + man.coda + vfact,
+#      iter=22000, burnIn=2000)
 
 ## ## ## ## ## ## ## ## ##
 ## ORDINAL MIXED MODEL  ##
 ## ## ## ## ## ## ## ## ##
 stop()
 library(ordinal)
-## model 1: {stop, affricate, fricative, aspiration} x before/after,
-## repetition, morpheme boundary
-stp_afr_fri_asp <- clmm(reduction ~ stp.bef + stp.coda + stp.ambi +
-                            afr.bef + afr.coda + afr.ambi +
-                            fri.bef + fri.coda + fri.ambi +
-                            asp.bef + asp.coda + asp.ambi +
-                            as.factor(rep) + (1|speaker) + (1|vowel) + (1|word),
-                        data=cleandata)
+## model 1: has numerically singular hessian
+all_manners_model <- clmm(reduction ~ man.bef + man.aft * coda +
+                              as.factor(rep) + (1|speaker) + (1|word) +
+                              (1|vowel), data=cleandata)
 sink("model1-summary.txt")
-summary(stp_afr_fri_asp)
+summary(all_manners_model)
 sink()
-save(stp_afr_fri_asp, file="model1.Rdata")
+## model 2:
+mod2 <- clmm(reduction ~ asp.bef + obs.bef + asp.aft + obs.aft * coda +
+                 as.factor(rep) + (1|speaker) + (1|word) + (1|vowel),
+             data=cleandata)
+sink("model2-summary.txt")
+print(summary(mod2))
+sink()
+save(mod2, file="model2.Rdata")
 
 ## ## ## ## ## ##
 ##  OLD STUFF  ##
