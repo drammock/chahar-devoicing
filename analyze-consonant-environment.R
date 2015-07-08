@@ -115,6 +115,7 @@ cleandata <- within(cleandata, {
     voi.ambi <- voi.aft & !coda
     phary <- vowel %in% phary
     round <- vowel %in% round
+    frication.bef <- fri.bef | afr.bef
 })
 
 manners <- c("gli", "liq", "nas", "fri", "pafr", "aafr", "pstp", "astp")  # glide first = baseline
@@ -273,12 +274,12 @@ stop()
 library(ordinal)
 ## model 1: factor levels for all manners of articulation
 ## (model has numerically singular hessian)
-all_manners_model <- clmm(reduction ~ man.bef + man.aft * coda +
-                              as.factor(rep) + (1|speaker) + (1|word) +
-                              (1|vowel), data=cleandata)
+mod1 <- clmm(reduction ~ man.bef + man.aft * coda + as.factor(rep) +
+                 (1|speaker) + (1|word) + (1|vowel), data=cleandata)
 sink("model1-summary.txt")
-summary(all_manners_model)
+print(summary(mod1))
 sink()
+save(mod1, file="model1.Rdata")
 ## model 2: aspiration, obstruent, cluster
 mod2 <- clmm(reduction ~ asp.bef + obs.bef + asp.aft + obs.aft * coda +
                  as.factor(rep) + (1|speaker) + (1|word) + (1|vowel),
@@ -287,6 +288,14 @@ sink("model2-summary.txt")
 print(summary(mod2))
 sink()
 save(mod2, file="model2.Rdata")
+## model 3: focus on phonetics
+mod3 <- clmm(reduction ~ asp.bef + frication.bef + asp.aft * coda +
+                 fri.aft * coda + as.factor(rep) + (1|speaker) + (1|word) +
+                 (1|vowel), data=cleandata)
+sink("model3-summary.txt")
+print(summary(mod3))
+sink()
+save(mod3, file="model3.Rdata")
 
 ## ## ## ## ## ## ## ## ## ## ##
 ## EXACT LOGISTIC REGRESSION  ##
