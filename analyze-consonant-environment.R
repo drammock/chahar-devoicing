@@ -156,7 +156,7 @@ tokens <- nrow(cleandata)                                                 #  215
 ##  MOSAIC PLOTS  ##
 ## ## ## ## ## ## ##
 cairo_pdf("mosaics_consonants.pdf", height=8.27, width=11.69, family="Charis SIL")
-par(mfrow=c(2, 3))
+par(mfrow=c(2, 4))
 threeshade <- hcl(0, 0, c(70, 50, 30))
 bordercol <- "#FFFFFF33"  # NA  # hcl(0, 0, 80)
 offset <- 0
@@ -164,6 +164,10 @@ offset <- 0
 mosaicplot(with(cleandata, table(reduction)), off=offset,
            dir="h", color=threeshade, las=1, border=bordercol,
            main="reduction type")
+## talker
+mosaicplot(with(cleandata, table(speaker, reduction)), off=offset,
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × talker", xlab="talker")
 ## pharyngeal
 mosaicplot(with(cleandata, table(phary, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
@@ -172,6 +176,10 @@ mosaicplot(with(cleandata, table(phary, reduction)), off=offset,
 mosaicplot(with(cleandata, table(vfact, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
            main="reduction × vowel quality", xlab="vowel quality")
+## repetition
+mosaicplot(with(cleandata, table(as.factor(rep), reduction)), off=offset,
+           dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
+           main="reduction × repetition", xlab="repetition")
 ## manner: before
 mosaicplot(with(cleandata, table(man.bef, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
@@ -263,14 +271,15 @@ dev.off()
 ## ## ## ## ## ## ## ## ##
 stop()
 library(ordinal)
-## model 1: has numerically singular hessian
+## model 1: factor levels for all manners of articulation
+## (model has numerically singular hessian)
 all_manners_model <- clmm(reduction ~ man.bef + man.aft * coda +
                               as.factor(rep) + (1|speaker) + (1|word) +
                               (1|vowel), data=cleandata)
 sink("model1-summary.txt")
 summary(all_manners_model)
 sink()
-## model 2:
+## model 2: aspiration, obstruent, cluster
 mod2 <- clmm(reduction ~ asp.bef + obs.bef + asp.aft + obs.aft * coda +
                  as.factor(rep) + (1|speaker) + (1|word) + (1|vowel),
              data=cleandata)
@@ -278,7 +287,6 @@ sink("model2-summary.txt")
 print(summary(mod2))
 sink()
 save(mod2, file="model2.Rdata")
-
 
 ## ## ## ## ## ## ## ## ## ## ##
 ## EXACT LOGISTIC REGRESSION  ##
