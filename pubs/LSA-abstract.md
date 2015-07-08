@@ -1,36 +1,39 @@
-# Predicting vowel devoicing and deletion in Chahar Mongolian
+# Phonetically-conditioned vowel deletion and devoicing in Chahar Mongolian
+
+# Deletion and devoicing of Chahar Mongolian vowels:
+
+# Vowel devoicing and deletion in Chahar Mongolian
 # Instability of initial-syllable vowels in Chahar Mongolian
 # Devoicing and deletion of allegedly stressed vowels in Chahar Mongolian
+# Initial-syllable vowel devoicing and deletion in Chahar Mongolian
 <!-- Choose a title that clearly indicates the topic of the research and is not more than one 7-inch typed line. Note that your choice of title has considerable influence on how your paper or poster is grouped with others to form thematically coherent sessions. A clear relationship between the title and content of your abstract will help ensure it is assigned to an appropriate session, should it be selected for presentation. -->
 
 <!-- State the problem or research question raised by prior work, with specific reference to relevant prior research. -->
 The Mongolian languages (ISO 639-3: `khk`, `mvf`; macrolanguage `mon`) are vowel-harmony languages, involving some form of pharyngeal/tongue-root harmony and rounding harmony in all dialects [@Svantesson]. Thus the quality of any single vowel in a polysyllabic word is fully or partially predictable from other vowels in the word, and the information load on a given vowel is diminished. Possibly in consequence of this, vowel devoicing and deletion are frequently observable in Mongolian conversational speech, and also occur in more formal registers.
 
-<!-- Debate in Mongolist linguistics on the placement of stress -- initial syllables supposedly stressed -- why would stressed vowels be deleted? @Svantesson, @Walker, Yurong may be able to provide more citations -->
-
 <!-- State the main point or argument of the proposed presentation. -->
-In this study, we analyze initial-syllable vowel devoicing and deletion in a wordlist corpus encompassing all attested C₁VC₂ sequences in the initial syllable in Chahar Mongolian (21558 tokens comprising 845 initial syllable types and 1204 unique words). Talkers are 3 male and 3 female native speakers of Chahar<!-- (the prestige dialect of Mongolian as spoken in the People’s Republic of China)-->. Words were read in a sentence frame, and the entire word list was recorded three times for each talker.
+In this study, we analyze initial-syllable vowel devoicing and deletion in a wordlist corpus encompassing all attested C₁VC₂ sequences in the initial syllable in Chahar Mongolian (21558 tokens comprising 845 initial syllable types and 1204 unique words). Talkers are 3 male and 3 female native speakers of Chahar<!-- (the prestige dialect of Mongolian as spoken in the People’s Republic of China)-->. Words were read in a sentence frame, and the entire word list was recorded three times for each talker. Reduction was classified by spectrographic assessment: briefly, vowels were classified as deleted when there was no apparent duration between C₁ and C₂ on the spectrogram; vowels with an apparent duration but no voicing bar and no visible formants were classified as devoiced.
 
 <!-- Regardless of the subfield, cite sufficient data, and explain why and how they support the main point or argument. When examples are in languages other than English, provide word-by-word glosses and underline the portions of the examples which are critical to the argument. Explain abbreviations at their first occurrence. -->
 
 <!-- If your research presents the results of experiments, but collection of results is not yet complete, then report what results you've already obtained in sufficient detail that your abstract may be evaluated. Also indicate explicitly the nature of the experimental design and the specific hypothesis tested. -->
 
 <!-- State the relevance of your ideas to past work or to the future development of the field. Describe analyses in as much detail as possible. Avoid saying in effect "a solution to this problem will be presented". If you are taking a stand on a controversial issue, summarize the arguments that led you to your position. -->
-<!-- how is vowel reduction defined/measured -->Probability of vowel reduction is modeled using cumulative-link mixed effects regression, with fixed effects for flanking consonant manner, flanking consonant aspiration, presence of a morpheme boundary between V and C₂, vowel harmony class, and repetition number. Random effects are modeled for talker, vowel, and word.
+<!-- how is vowel reduction defined/measured -->Probability of vowel reduction is modeled using cumulative-link mixed effects regression, with fixed effects for flanking consonant manner, flanking consonant aspiration, whether C₂ is intervocalic or the first element of a cluster, and list repetition number. Random effects are modeled for talker, vowel, and word.
 
-Results show aspiration of the following consonant to be the best predictor of vowel reduction (consistent with the fact that non-initial stops and affricates are pre-aspirated in some dialects of Mongolian [@SvantessonKarlsson]). Aspiration of the preceding consonant, as well as presence of fricatives either preceding or following, were also good predictors of vowel reduction.
+Results show that the best predictors of vowel reduction are aspiration of the flanking consonant (both preceding and following), and frication directly adjacent to the vowel (i.e., both preceding and following fricatives, but only preceding affricates). The fact that aspirated stops and affricates cause reduction even in C₂ position is consistent with the fact that non-initial stops and affricates are pre-aspirated in some dialects of Mongolian [@SvantessonKarlsson], a phenomenon which is not yet well-established for Chahar but does appear in this corpus. An additional finding is that frication and aspiration in C₂ position are more likely to cause vowel reduction when intervocalic (C₁VC₂V) than when clustered (C₁VC₂C₃V), though examples of both devoicing and deletion in for both word types are attested in our data.
 <!-- pre-aspiration citation? -->
 
 <!-- State the contribution to linguistic research made by the analysis. -->
-Results are discussed in light of potentially conflicting forces: articulatory ease [e.g., @Lindblom] and phonetic cue preservation [@Wright]. In particular, persistence of vowels flanked by sonorant consonants is explained by appeal to articulatory ease, whereas reduction of vowels flanked by fricative consonants is explained by appeal to the robustness of fricative-internal cues. The high degree of reduction around stop consonants is rather more difficult to account for, due to the relative fragility of stop-consonant cues (which would predict preservation of the vowel in order to perserve formant transition cues).
-
-Change in progress?  New historical development (moving toward initial C clusters?)
+Results are discussed in light of three potentially conflicting forces: articulatory ease [e.g., @Lindblom], phonetic cue preservation [@Wright], and position of word stress. <!--In particular, the persistence of vowels flanked by sonorant consonants is explained by appeal to articulatory ease, whereas reduction of vowels flanked by frication is explained by appeal to the robustness of fricative-internal cues.--> The fact that affricates in C₁ position pattern with fricatives while affricates in C₂ position pattern with stops is a particularly telling indication that vowel devoicing and deletion in Mongolian are phonetically conditioned, not phonologically conditioned. The relationship of this phenomenon to patterns of vowel length and vowel harmony are discussed, along with its status as stable variation versus a change-in-progress.
 
 <!-- While citation in the text of the relevant literature is essential, a separate list of references at the end of the abstract is generally unnecessary. -->
 
 <!-- When you submit your abstract to the website, please identify a primary field on the basis of the abstract's general topic area, and use the secondary field to indicate methodology or a secondary topic. For example, a paper or poster about the production of relative clauses could have "syntax" as its primary field, and "psycholinguistics" as the secondary field. This will make it easier to assign your abstract to appropriate reviewers. -->
 Phonetics
 Laboratory phonology?
+
+453 words
 
 <!-- END ABSTRACT. NOTES/QUESTIONS FOLLOW. -->
 
