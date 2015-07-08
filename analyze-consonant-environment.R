@@ -197,14 +197,18 @@ cat("## SIMULATION RESULTS\n\n")
 sink()
 n <- nrow(cleandata)
 prop <- c(0.16, 0.08, 0.04, 0.02, 0.01)
+reduced <- rbinom(n, 1, 0.16)
+deleted <- rbinom(sum(reduced), 1, 0.5) + 1
+reduced[reduced == 1] <- deleted
+ixs <- which(reduced > 0)
 for (p in prop) {
-    reduced <- rbinom(n, 1, p)
-    deleted <- rbinom(sum(reduced), 1, 0.5) + 1
-    reduced[reduced == 1] <- deleted
-    reduc <- factor(reduced, labels=c("none", "devoiced", "deleted"))
-    mod <- with(cleandata, clmm(reduc ~ man.bef + man.aft * coda +
-                                    as.factor(rep) + (1|speaker) + (1|word) +
-                                    (1|vowel)))
+    frac <- round(0.16 / p)
+    reduc <- reduced
+    reduc[ixs[seq_along(ixs) %% frac != 0]] <- 0
+    reduc <- factor(reduc, labels=c("none", "devoiced", "deleted"))
+    mod <- with(cleandata, clmm(reduc ~ asp.bef + obs.bef + asp.aft +
+                                    obs.aft * coda + as.factor(rep) +
+                                    (1|speaker) + (1|word) + (1|vowel)))
     save(mod, file=paste0("mod_", p, ".Rdata", collapse=""))
     sink(outfile, append=TRUE)
     cat("## proportion of events: ", p, "\n\n")
@@ -212,19 +216,47 @@ for (p in prop) {
     cat("\n\n")
     sink()
 }
-stop()
 
-## ## ## ## ## ## ## ## ## ## ##
-## EXACT LOGISTIC REGRESSION  ##
-## ## ## ## ## ## ## ## ## ## ##
-# stop()
-# library(elrm)
-# xdata <- xtabs(~ red.bin + interaction(man.bef, man.aft, coda, vfact,
-#                                        as.factor(rep), speaker), data=cleandata)
-# elrm(formula=red.bin ~ man.bef + man.ambi + man.coda + vfact + as.factor(rep) +
-#          speaker + word,
-#      interest= ~ man.bef + man.ambi + man.coda + vfact,
-#      iter=22000, burnIn=2000)
+## ## ## ## ## ## ## ##
+## SIMULATION TESTS  ##
+## ## ## ## ## ## ## ##
+stop()
+stdevs <- data.frame()
+ests <- data.frame()
+for (p in prop) {
+    load(paste0("mod_", p, ".Rdata", collapse=""))
+    nam <- paste0("mod_", p, collapse="")
+    ## coefficient estimates
+    start.ix <- which(names(mod$coefficients) %in% "asp.befTRUE")
+    end.ix <- which(names(mod$coefficients) %in% "obs.aftTRUE:codaTRUE")
+    foo <- mod$coefficients[start.ix:end.ix]
+    baz <- as.data.frame(t(foo))
+    colnames(baz) <- names(foo)
+    rownames(baz) <- nam
+    ests <- rbind(ests, baz)
+    ## standard deviations of estimates
+    fixef.stdev <- sqrt(diag(vcov(mod)))
+    start.ix <- which(names(fixef.stdev) %in% "asp.befTRUE")
+    end.ix <- which(names(fixef.stdev) %in% "obs.aftTRUE:codaTRUE")
+    fixef.stdev <- fixef.stdev[start.ix:end.ix]
+    bar <- as.data.frame(t(fixef.stdev))
+    colnames(bar) <- names(fixef.stdev)
+    rownames(bar) <- nam
+    stdevs <- rbind(stdevs, bar)
+}
+## plot
+cairo_pdf("simulation.pdf", width=40, height=15)
+x <- seq(-10, 10, 0.02)
+par(mfrow=dim(ests), mar=c(2,3,3,2), oma=c(2, 4, 4, 2))
+for (row in 1:nrow(ests)) {
+    for (col in 1:ncol(ests)) {
+        curve(dnorm(x, mean=ests[row, col], sd=stdevs[row, col]), xlab="", ylab="")
+        if (col == 1) mtext(rownames(ests)[row], side=2, line=4)
+        if (row == 1) mtext(colnames(ests)[col], side=3, line=4)
+    }
+}
+dev.off()
+
 
 ## ## ## ## ## ## ## ## ##
 ## ORDINAL MIXED MODEL  ##
@@ -246,6 +278,20 @@ sink("model2-summary.txt")
 print(summary(mod2))
 sink()
 save(mod2, file="model2.Rdata")
+
+
+## ## ## ## ## ## ## ## ## ## ##
+## EXACT LOGISTIC REGRESSION  ##
+## ## ## ## ## ## ## ## ## ## ##
+# stop()
+# library(elrm)
+# xdata <- xtabs(~ red.bin + interaction(man.bef, man.aft, coda, vfact,
+#                                        as.factor(rep), speaker), data=cleandata)
+# elrm(formula=red.bin ~ man.bef + man.ambi + man.coda + vfact + as.factor(rep) +
+#          speaker + word,
+#      interest= ~ man.bef + man.ambi + man.coda + vfact,
+#      iter=22000, burnIn=2000)
+
 
 ## ## ## ## ## ##
 ##  OLD STUFF  ##
