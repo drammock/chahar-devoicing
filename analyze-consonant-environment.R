@@ -307,6 +307,28 @@ print(summary(mod3))
 sink()
 save(mod3, file="model3.Rdata")
 
+## ## ## ## ## ## ##
+##  plot model 3  ##
+## ## ## ## ## ## ##
+## coefficient estimates
+start.ix <- which(names(mod3$coefficients) %in% "asp.befTRUE")
+end.ix <- which(names(mod3$coefficients) %in% "codaTRUE:fri.aftTRUE")
+ests <- mod3$coefficients[start.ix:end.ix]
+## standard deviations of estimates
+fixef.stdev <- sqrt(diag(vcov(mod3)))
+start.ix <- which(names(fixef.stdev) %in% "asp.befTRUE")
+end.ix <- which(names(fixef.stdev) %in% "codaTRUE:fri.aftTRUE")
+stdevs <- fixef.stdev[start.ix:end.ix]
+## plot
+cairo_pdf("model3.pdf", width=15, height=15)
+x <- seq(-10, 10, 0.02)
+par(mfrow=c(3, 3), mar=c(2,3,3,2), oma=c(2, 4, 4, 2))
+for (n in names(ests)) {
+    curve(dnorm(x, mean=ests[n], sd=stdevs[n]), main=n)
+}
+dev.off()
+
+
 ## ## ## ## ## ## ## ## ## ## ##
 ## EXACT LOGISTIC REGRESSION  ##
 ## ## ## ## ## ## ## ## ## ## ##
