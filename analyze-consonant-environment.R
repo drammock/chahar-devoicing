@@ -156,7 +156,7 @@ tokens <- nrow(cleandata)                                                 #  215
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
 ## ## ## ## ## ## ##
-cairo_pdf("mosaics_consonants.pdf", height=8.27, width=11.69, family="Charis SIL")
+cairo_pdf("mosaics_consonants.pdf", height=8.5, width=11, family="Charis SIL")
 par(mfrow=c(2, 4))
 threeshade <- hcl(0, 0, c(70, 50, 30))
 bordercol <- "#FFFFFF33"  # NA  # hcl(0, 0, 80)
@@ -194,6 +194,16 @@ mosaicplot(with(cleandata, table(man.coda, reduction)), off=offset,
            dir=c("v", "h"), color=threeshade, las=1, border=bordercol,
            main="reduction × coda consonant", xlab="manner")
 dev.off()
+
+## manner: bef vs after
+with(cleandata, table(man.bef, man.aft))
+cairo_pdf("mosaic_cons_bef_aft.pdf", height=4.5, width=4.5, family="Charis SIL")
+mosaicplot(with(cleandata, table(man.bef, man.aft)), off=offset,
+           dir=c("v", "h"), color=TRUE, las=1, border=bordercol,
+           main="onset cons. vs. following cons.", xlab="onset",
+           ylab="following")
+dev.off()
+
 
 ## ## ## ## ## ##
 ## SIMULATIONS ##
@@ -253,7 +263,7 @@ for (p in prop) {
     rownames(bar) <- nam
     stdevs <- rbind(stdevs, bar)
 }
-## plot
+## plot simulation
 cairo_pdf("simulation.pdf", width=40, height=15)
 x <- seq(-10, 10, 0.02)
 par(mfrow=dim(ests), mar=c(2,3,3,2), oma=c(2, 4, 4, 2))
