@@ -1,5 +1,13 @@
-# Phonetically-conditioned vowel deletion and devoicing in Chahar Mongolian
-
+---
+title: Phonetically-conditioned vowel deletion and devoicing in Chahar Mongolian
+documentclass: article
+classoption: oneside
+fontsize: 12pt
+geometry:
+- letterpaper
+- margin=1in
+biblio-files: chahar
+---
 The Mongolian languages (ISO 639-3: `khk`, `mvf`; macrolanguage `mon`) are vowel-harmony languages, involving some form of pharyngeal/tongue-root harmony and rounding harmony in all dialects [@Svantesson]. Thus the quality of most vowels in polysyllabic words are fully or partially predictable from other vowels in the word, and the lexical information load on any given vowel is correspondingly diminished. Possibly in consequence of this, vowel devoicing and deletion are frequently observable in Mongolian conversational speech, and also occur in more formal registers.
 
 In this study, we analyze initial-syllable vowel devoicing and deletion in a wordlist corpus encompassing all attested C₁VC₂ sequences in the initial syllable in Chahar Mongolian (21558 tokens comprising 845 initial syllable types and 1204 unique words). Talkers were 3 male and 3 female native speakers of Chahar. Words were read in a sentence frame, and the entire word list was recorded three times by each talker. Vowel reduction for each token was classified by spectrographic assessment using a 3-way scheme: when there was no apparent duration between C₁ and C₂ on the spectrogram, vowels were classified as “deleted”; vowels with an apparent duration but no voicing bar and no visible formants were classified as “devoiced”; other vowels were classified as “unreduced”.
