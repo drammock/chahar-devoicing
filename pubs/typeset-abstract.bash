@@ -8,3 +8,6 @@ pandoc -s --latex-engine=xelatex --natbib --no-tex-ligatures --template=template
 
 ## delete second page (references)
 pdftk LSA-abstract.pdf cat 1 output LSA-abs-final.pdf
+
+## vacuum metadata
+exiftool -Author= -Creator= -Producer= LSA-abs-final.pdf
