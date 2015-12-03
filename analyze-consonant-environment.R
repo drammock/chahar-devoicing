@@ -310,6 +310,26 @@ save(mod3, file="model3.Rdata")
 ## ## ## ## ## ## ##
 ##  plot model 3  ##
 ## ## ## ## ## ## ##
+stop()
+library(coefplot2)
+coefplot2(mod3)
+fixefs <- names(mod3$beta)[order(mod3$beta)]
+prettynames <- c(asp.befTRUE="C1 aspirated",
+                 frication.befTRUE="C1 is fricative or affricate",
+                 asp.aftTRUE="C2 is (pre)aspirated",
+                 codaTRUE="C2 is in a cluster",
+                 fri.aftTRUE="C2 is fricative",
+                 `as.factor(rep)2`="list repetition 2",
+                 `as.factor(rep)3`="list repetition 3",
+                 `asp.aftTRUE:codaTRUE`="C2 is (pre)aspirated and in a cluster",
+                 `codaTRUE:fri.aftTRUE`="C2 is fricative and in a cluster")
+stdevs <- sqrt(diag(vcov(mod3)))
+pdf("mod3_coefplot.pdf", width=14, height=7)
+coefplot2(mod3$coefficients[fixefs], stdevs[fixefs], prettynames[fixefs],
+          main="", lwd.1=4, lwd.2=2, cex.var=1, cex.pts=1, pch="|")
+title("Regression parameter estimates", line=2)
+dev.off()
+
 ## coefficient estimates
 start.ix <- which(names(mod3$coefficients) %in% "asp.befTRUE")
 end.ix <- which(names(mod3$coefficients) %in% "codaTRUE:fri.aftTRUE")
