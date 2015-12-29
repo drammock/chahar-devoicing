@@ -368,30 +368,31 @@ mod <- mod5c
 library(ordinal)  # otherwise summary, etc won't work
 library(coefplot2)
 coefplot2(mod)
-prettynames <- c(## aspiration / frication
-                 asp.aftTRUE="C₂ aspirated",
-                 fri.aftTRUE="C₂ fricative",
-                 asp.befTRUE="C₁ aspirated",
+prettynames <- c(## C1/C2 frication / aspiration
                  fri.befTRUE="C₁ fricative",
-                 #frication.befTRUE="C₁ fricative/affricate",
+                 asp.befTRUE="C₁ aspirated",
+                 fri.aftTRUE="C₂ fricative",
+                 asp.aftTRUE="C₂ aspirated",
+                 # C2 coda + interactions
+                 codaTRUE="C₂ in cluster",
+                 `codaTRUE:fri.aftTRUE`="C₂ fricative & in cluster",
+                 `asp.aftTRUE:codaTRUE`="C₂ aspirated & in cluster",
+                 `asp.befTRUE:asp.aftTRUE`="C₁ & C₂ both aspirated",
                  ## affricate asymmetry
                  afr.befTRUE="C₁ affricate",
                  afr.aftTRUE="C₂ affricate",
-                 codaTRUE="C₂ in cluster",
+                 `codaTRUE:afr.aftTRUE`="C₂ affricate & in cluster",
                  ## list effects
                  `as.factor(rep)2`="list rep. 2",
-                 `as.factor(rep)3`="list rep. 3",
-                 ## not signif / negative
-                 `codaTRUE:afr.aftTRUE`="C₂ affricate & in cluster",
-                 `codaTRUE:fri.aftTRUE`="C₂ fricative & in cluster",
-                 `asp.aftTRUE:codaTRUE`="C₂ aspirated & in cluster",
-                 `asp.befTRUE:asp.aftTRUE`="C₁ & C₂ both aspirated")
+                 `as.factor(rep)3`="list rep. 3")
 #fixefs <- names(mod$beta)[order(mod$beta)]
 fixefs <- rev(names(prettynames))  # manually set best order
-colors <- hcl(h=seq(250, -110, length.out=5), c=c(100, 85, 70, 55, 0),
-              l=seq(30, 60, length.out=5), fixup=TRUE)
-colors <- c("#4477aa", "#cc6677", "#117733", "#999933", "#666666")
-cols <- rev(rep(colors, times=c(4, 2, 1, 2, 4)))
+# colors <- hcl(h=seq(250, -110, length.out=5), c=c(100, 85, 70, 55, 0),
+#               l=seq(30, 60, length.out=5), fixup=TRUE)
+colors <- c("#4477aa", "#cc6677", "#117733", "#999933") # Paul Tol
+cols <- rev(rep(colors, times=c(4, 4, 3, 2)))
+# colors <- c("#4477aa", "#cc6677", "#117733", "#999999")
+# cols <- rev(rep(colors, times=c(4, 2, 2, 5)))
 #desat <- hcl(h=0, c=0, l=seq(50, 70, length.out=4), fixup=TRUE)
 #cols <- rev(c(rep(colors[-4], times=c(4, 3, 2)), rep(desat[4], times=4)))
 stdevs <- sqrt(diag(vcov(mod)))
