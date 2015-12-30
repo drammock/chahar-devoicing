@@ -3,6 +3,8 @@
 ## (wordlist recordings). This script takes the output of clean-data.R
 ## and looks at vowel devoicing based on consonantal context.
 
+cleandata <- read.delim("cleandata.tsv", sep="\t")
+
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
 ## ## ## ## ## ## ##
