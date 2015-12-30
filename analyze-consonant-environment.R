@@ -13,6 +13,10 @@ cleandata$man.bef <- factor(cleandata$man.bef, levels=manners)    # gli baseline
 cleandata$man.aft <- factor(cleandata$man.aft, levels=manners)    # gli baseline
 cleandata$man.ambi <- factor(cleandata$man.ambi, levels=manners)  # gli baseline
 cleandata$man.coda <- factor(cleandata$man.coda, levels=manners)  # gli baseline
+cleandata$rep <- factor(cleandata$rep)
+# contrasts(cleandata$rep) <- matrix(c(-0.5, 0.5, 0, -0.5, 0, 0.5),
+#                                    nrow=length(levels(cleandata$rep)),
+#                                    dimnames=list(NULL, c("2vs1", "3vs1")))
 stop()
 
 ## ## ## ## ## ## ##
@@ -173,6 +177,23 @@ mod6 <- clmm(reduction ~ asp.bef + asp.aft*coda + fri.bef + fri.aft*coda +
                  afr.bef + afr.aft*coda + stp.bef + stp.aft*coda +
                  nas.bef + nas.aft*coda + as.factor(rep) +
                  (1|speaker) + (1|word) + (1|vowel), data=cleandata)
+## mod 7
+mod7 <- clmm(reduction ~ asp.bef + asp.aft*coda +
+                 fri.bef + fri.aft*coda + afr.bef + afr.aft*coda +
+                 stp.bef + stp.aft*coda + as.factor(rep) +
+                 (1|speaker) + (1|word) + (1|vowel), data=cleandata)
+## mod 7b
+mod7b <- clmm(reduction ~ fri.bef + afr.bef + stp.bef + asp.bef +
+                 fri.aft + afr.aft + stp.aft + asp.aft + coda +
+                 as.factor(rep) + (1|speaker) + (1|word) + (1|vowel),
+              data=cleandata)
+anova(mod7, mod7b)
+## mod 9
+mod9 <- clmm(reduction ~ gli.bef + fri.bef + afr.bef + stp.bef + asp.bef +
+                 nas.aft + fri.aft + afr.aft + stp.aft + asp.aft +
+                 as.factor(rep) +
+                 (1|speaker) + (1|word) + (1|vowel), data=cleandata)
+
 
 ## test
 lrtest <- anova(nullmod, mod5a, mod5b, mod5c)
@@ -187,24 +208,27 @@ save(mod5c, file="model5c.Rdata")
 ## ## ## ## ## ## ##
 stop()
 load("model5c.Rdata")
-mod <- mod5c
+mod <- mod7
 library(ordinal)  # otherwise summary, etc won't work
 library(coefplot2)
 coefplot2(mod)
-prettynames <- c(## C1/C2 frication / aspiration
-                 fri.befTRUE="C₁ fricative",
-                 asp.befTRUE="C₁ aspirated",
-                 fri.aftTRUE="C₂ fricative",
-                 asp.aftTRUE="C₂ aspirated",
+prettynames <- c(## aspiration
+                 asp.befTRUE="C1 aspirated",
+                 fri.befTRUE="C1 fricative",
+                 afr.befTRUE="C1 affricate",
+                 stp.befTRUE="C1 stop",
+                 ## manner
+                 asp.aftTRUE="C2 aspirated",
+                 fri.aftTRUE="C2 fricative",
+                 afr.aftTRUE="C2 affricate",
+                 stp.aftTRUE="C2 stop",
                  # C2 coda + interactions
-                 codaTRUE="C₂ in cluster",
-                 `codaTRUE:fri.aftTRUE`="C₂ fricative & in cluster",
-                 `asp.aftTRUE:codaTRUE`="C₂ aspirated & in cluster",
-                 `asp.befTRUE:asp.aftTRUE`="C₁ & C₂ both aspirated",
-                 ## affricate asymmetry
-                 afr.befTRUE="C₁ affricate",
-                 afr.aftTRUE="C₂ affricate",
-                 `codaTRUE:afr.aftTRUE`="C₂ affricate & in cluster",
+                 codaTRUE="C2 in cluster",
+                 `asp.aftTRUE:codaTRUE`="C2 aspirated & in cluster",
+                 `codaTRUE:fri.aftTRUE`="C2 fricative & in cluster",
+                 `codaTRUE:afr.aftTRUE`="C2 affricate & in cluster",
+                 `codaTRUE:stp.aftTRUE`="C2 stop & in cluster",
+                 #`asp.befTRUE:asp.aftTRUE`="C1 & C2 both aspirated",
                  ## list effects
                  `as.factor(rep)2`="list rep. 2",
                  `as.factor(rep)3`="list rep. 3")
@@ -213,7 +237,7 @@ fixefs <- rev(names(prettynames))  # manually set best order
 # colors <- hcl(h=seq(250, -110, length.out=5), c=c(100, 85, 70, 55, 0),
 #               l=seq(30, 60, length.out=5), fixup=TRUE)
 colors <- c("#4477aa", "#cc6677", "#117733", "#999933") # Paul Tol
-cols <- rev(rep(colors, times=c(4, 4, 3, 2)))
+cols <- rev(rep(colors, times=c(4, 4, 5, 2)))
 # colors <- c("#4477aa", "#cc6677", "#117733", "#999999")
 # cols <- rev(rep(colors, times=c(4, 2, 2, 5)))
 #desat <- hcl(h=0, c=0, l=seq(50, 70, length.out=4), fixup=TRUE)
@@ -223,9 +247,11 @@ xvals <- mod$coefficients[fixefs]
 yvals <- seq_along(xvals)
 # pval stars
 pvals <- coef(summary(mod))[, 4]
-stars <- symnum(pvals, corr=FALSE, na=FALSE,
-                cutpoints = c(0, 0.01, 1),
-                symbols = c("*", " "), legend=FALSE)
+stars <- symnum(pvals, corr=FALSE, na=FALSE, legend=FALSE,
+                cutpoints = c(0, 0.001, 0.01, 0.05, 1),
+                symbols = c("***", "**", "*", " "))
+                #cutpoints = c(0, 0.01, 1),
+                #symbols = c("*", " "))
 # crosshairs
 onesd <- stdevs[fixefs]
 minusone <- xvals - onesd
@@ -245,13 +271,13 @@ segments(minusone, yvals, plusone, lwd=10, lend="butt", col=cols)
 points(xvals, yvals, pch="|", cex=2, col=cols)
 axis(3, at=xtick, labels=xlab, cex.axis=2.5)
 # left axis
-Map(function(y, txt, color)
-    axis(2, at=y, col.axis=color, labels=txt, cex.axis=2.5, tick=FALSE, line=NA, las=1),
-    yvals, prettynames[fixefs], cols)
+invisible(Map(function(y, txt, color)
+    axis(2, at=y, col.axis=color, labels=txt, cex.axis=2.5, tick=FALSE, line=1,
+         las=1), yvals, prettynames[fixefs], cols))
 # right axis
-Map(function(y, txt, color)
-    axis(2, at=y, col.axis=color, labels=txt, cex.axis=2.5, tick=FALSE, line=-1.5, las=1),
-    yvals, stars[fixefs], cols)
+invisible(Map(function(y, txt, color)
+    axis(2, at=y, col.axis=color, labels=txt, cex.axis=2, tick=FALSE,
+         line=0.75, las=1, hadj=0), yvals, stars[fixefs], cols))
 title("Regression parameter estimates", line=4, cex.main=3)
 dev.off()
 
