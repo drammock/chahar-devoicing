@@ -157,19 +157,10 @@ cleandata$man.ambi <- apply(cleandata[man.ambi], 1,
 cleandata$man.coda <- apply(cleandata[man.coda], 1,
                             function(i) if (all(!i)) NA else manners[i])
 
-## make some factors
-cleandata$reduction <- factor(cleandata$reduction,
-                              levels=c("none", "devoiced", "deleted"),
-                              ordered=TRUE)
+## vowels
 vowels_decr_f2 <- c("i", "ɪ", "œ", "æ", "ɐ", "ǝ", "ɔ", "o", "ʊ", "u")
 vowels_by_phary <- c("œ", "ɪ", "æ", "ɐ", "ɔ", "ʊ",  # pharyngeal
                      "i", "ǝ", "o", "u")            # non-pharyngeal
-
-cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # œ baseline
-cleandata$man.bef <- factor(cleandata$man.bef, levels=manners)    # gli baseline
-cleandata$man.aft <- factor(cleandata$man.aft, levels=manners)    # gli baseline
-cleandata$man.ambi <- factor(cleandata$man.ambi, levels=manners)  # gli baseline
-cleandata$man.coda <- factor(cleandata$man.coda, levels=manners)  # gli baseline
 
 ## ## ## ## ## ## ##
 ##  CORPUS STATS  ##

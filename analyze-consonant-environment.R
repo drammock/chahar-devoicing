@@ -3,7 +3,17 @@
 ## (wordlist recordings). This script takes the output of clean-data.R
 ## and looks at vowel devoicing based on consonantal context.
 
-cleandata <- read.delim("cleandata.tsv", sep="\t")
+cleandata <- read.delim("cleandata.tsv", sep="\t", stringsAsFactors=FALSE)
+## manually make factors
+cleandata$reduction <- factor(cleandata$reduction,
+                              levels=c("none", "devoiced", "deleted"),
+                              ordered=TRUE)
+cleandata$vfact <- factor(cleandata$vowel, levels=vowels_by_phary)  # œ baseline
+cleandata$man.bef <- factor(cleandata$man.bef, levels=manners)    # gli baseline
+cleandata$man.aft <- factor(cleandata$man.aft, levels=manners)    # gli baseline
+cleandata$man.ambi <- factor(cleandata$man.ambi, levels=manners)  # gli baseline
+cleandata$man.coda <- factor(cleandata$man.coda, levels=manners)  # gli baseline
+stop()
 
 ## ## ## ## ## ## ##
 ##  MOSAIC PLOTS  ##
@@ -13,8 +23,7 @@ cleandata <- read.delim("cleandata.tsv", sep="\t")
 oranges <- hcl(60, seq(40, 80, length.out=3), seq(85, 40, length.out=3), fixup=TRUE)
 blues <- hcl(260, seq(40, 80, length.out=3), seq(85, 40, length.out=3), fixup=TRUE)
 grays <- hcl(260, 0, seq(85, 40, length.out=3), fixup=FALSE)
-
-bordercol <- NA  # "white"  # NA  # "#FFFFFF33"  # hcl(0, 0, 80)
+bordercol <- NA  # "white"
 offs <- 0.8
 
 tab <- with(cleandata, table(vfact, reduction))
@@ -150,7 +159,7 @@ save(mod3, file="model3.Rdata")
 #                  fri.aft * coda + afr.aft * coda + as.factor(rep) +
 #                  (1|speaker) + (1|word) + (1|vowel), data=cleandata)
 # save(mod4, file="model4.Rdata")
-## mod 5: aspiration only
+## mod 5: aspiration interaction
 mod5a <- clmm(reduction ~ asp.bef*asp.aft + asp.aft*coda + as.factor(rep) +
                   (1|speaker) + (1|word) + (1|vowel), data=cleandata)
 mod5b <- clmm(reduction ~ asp.bef*asp.aft + asp.aft*coda + as.factor(rep) +
@@ -159,11 +168,19 @@ mod5b <- clmm(reduction ~ asp.bef*asp.aft + asp.aft*coda + as.factor(rep) +
 mod5c <- clmm(reduction ~ asp.bef*asp.aft + asp.aft*coda + as.factor(rep) +
                   fri.bef + fri.aft*coda + afr.bef + afr.aft*coda +
                   (1|speaker) + (1|word) + (1|vowel), data=cleandata)
+## mod 6:
+mod6 <- clmm(reduction ~ asp.bef + asp.aft*coda + fri.bef + fri.aft*coda +
+                 afr.bef + afr.aft*coda + stp.bef + stp.aft*coda +
+                 nas.bef + nas.aft*coda + as.factor(rep) +
+                 (1|speaker) + (1|word) + (1|vowel), data=cleandata)
+
 ## test
 lrtest <- anova(nullmod, mod5a, mod5b, mod5c)
 save(mod5a, file="model5a.Rdata")
 save(mod5b, file="model5b.Rdata")
 save(mod5c, file="model5c.Rdata")
+
+
 
 ## ## ## ## ## ## ##
 ##  plot model 5c ##
