@@ -4,6 +4,10 @@
 ## and looks at vowel devoicing based on consonantal context.
 
 cleandata <- read.delim("cleandata.tsv", sep="\t", stringsAsFactors=FALSE)
+## misc stuff
+vowels_by_phary <- c("œ", "ɪ", "æ", "ɐ", "ɔ", "ʊ",  # pharyngeal
+                     "i", "ǝ", "o", "u")            # non-pharyngeal
+manners <- c("gli", "liq", "nas", "fri", "afr", "stp")  # glide first = baseline
 ## manually make factors
 cleandata$reduction <- factor(cleandata$reduction,
                               levels=c("none", "devoiced", "deleted"),
